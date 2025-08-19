@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZetaCron CFO Suite — Starter</title>
+  <meta name="description" content="Lightweight, client-side CFO tools: cashflow Monte Carlo, scenarios, hiring, cap table, and P&L." />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js (for quick charts) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="badge">Z</div>
+      <div class="title">ZetaCron CFO Suite</div>
+    </div>
+    <nav class="topnav">
+      <button id="btnSave" class="btn">Save</button>
+      <button id="btnLoad" class="btn">Load</button>
+      <button id="btnExport" class="btn primary">Export</button>
+      <a class="link" href="https://www.zetacronsolutions.com" target="_self">Invoicer</a>
+      <a class="link" href="https://simulator.zetacronsolutions.com" target="_self">Monte Carlo</a>
+    </nav>
+  </header>
+
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Primary">
+      <button class="navitem active" data-view="dashboard">🏠 Dashboard</button>
+      <button class="navitem" data-view="cashflow">📊 Cashflow Simulator</button>
+      <button class="navitem" data-view="scenarios">🔀 Scenario Builder</button>
+      <button class="navitem" data-view="hiring">👥 Hiring Forecaster</button>
+      <button class="navitem" data-view="captable">📈 Cap Table Lite</button>
+      <button class="navitem" data-view="pl">📑 Profit &amp; Loss</button>
+      <button class="navitem" data-view="settings">⚙️ Settings</button>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view show">
+        <h1>Dashboard</h1>
+        <div class="grid">
+          <div class="card kpi">
+            <div class="kpi-title">Cash Runway</div>
+            <div class="kpi-value" id="kpiRunway">—</div>
+            <div class="progress"><div id="runwayBar"></div></div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-title">Burn Rate (monthly)</div>
+            <div class="kpi-value" id="kpiBurn">$25,000</div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-title">Gross Margin</div>
+            <div class="kpi-value" id="kpiGM">65%</div>
+          </div>
+          <div class="card">
+            <div class="card-hd">Cash Balance (Median / Band)</div>
+            <canvas id="chartCash"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-hd">P&amp;L Snapshot (Last 6 Months)</div>
+            <canvas id="chartPL"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- CASHFLOW SIM -->
+      <section id="view-cashflow" class="view">
+        <h1>Cashflow Simulator</h1>
+        <div class="panel">
+          <label>Starting Cash <input id="cfStartCash" type="number" value="200000" /></label>
+          <label>Monthly Revenue <input id="cfRevenue" type="number" value="60000" /></label>
+          <label>Monthly Costs <input id="cfCosts" type="number" value="45000" /></label>
+          <label>Std Dev (Revenue) <input id="cfRevStd" type="number" value="10000" /></label>
+          <label>Months <input id="cfMonths" type="number" value="18" /></label>
+          <label>Sims <input id="cfSims" type="number" value="1000" /></label>
+          <button id="btnRunCF" class="btn primary">Run</button>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="card-hd">Outcomes</div>
+            <canvas id="chartCF"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-hd">Summary</div>
+            <div id="cfSummary" class="summary"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCENARIOS -->
+      <section id="view-scenarios" class="view">
+        <h1>Scenario Builder</h1>
+        <div class="panel two">
+          <div>
+            <h3>Scenario A</h3>
+            <label>Growth % <input id="scA_growth" type="number" value="3" /></label>
+            <label>Churn % <input id="scA_churn" type="number" value="1" /></label>
+            <label>Expense Growth % <input id="scA_exp" type="number" value="1.5" /></label>
+          </div>
+          <div>
+            <h3>Scenario B</h3>
+            <label>Growth % <input id="scB_growth" type="number" value="8" /></label>
+            <label>Churn % <input id="scB_churn" type="number" value="2" /></label>
+            <label>Expense Growth % <input id="scB_exp" type="number" value="2.5" /></label>
+          </div>
+        </div>
+        <button id="btnRunSc" class="btn primary">Compare</button>
+        <div class="card">
+          <div class="card-hd">Revenue Trajectories</div>
+          <canvas id="chartScenarios"></canvas>
+        </div>
+      </section>
+
+      <!-- HIRING -->
+      <section id="view-hiring" class="view">
+        <h1>Hiring Forecaster</h1>
+        <div class="panel">
+          <button id="btnAddHire" class="btn">+ Add Role</button>
+          <table class="tbl" id="hireTable" aria-label="Hiring table">
+            <thead><tr><th>Role</th><th>Salary</th><th>Benefits %</th><th>Start (month)</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-hd">Burn Impact</div>
+          <canvas id="chartHiring"></canvas>
+        </div>
+      </section>
+
+      <!-- CAP TABLE -->
+      <section id="view-captable" class="view">
+        <h1>Cap Table Lite</h1>
+        <div class="panel">
+          <label>Pre-money Valuation <input id="ctPre" type="number" value="5000000" /></label>
+          <label>New Investment <input id="ctInvest" type="number" value="1000000" /></label>
+          <label>Founders % (pre) <input id="ctFounders" type="number" value="80" /></label>
+          <label>Option Pool % (pre) <input id="ctOptions" type="number" value="10" /></label>
+          <button id="btnCalcCT" class="btn primary">Recalculate</button>
+        </div>
+        <div class="card">
+          <div class="card-hd">Post-money Ownership</div>
+          <table class="tbl" id="ctTable"></table>
+        </div>
+      </section>
+
+      <!-- P&L -->
+      <section id="view-pl" class="view">
+        <h1>Profit &amp; Loss</h1>
+        <div class="panel">
+          <label>Import Invoices CSV <input id="plInv" type="file" accept=".csv" /></label>
+          <label>Import Expenses CSV <input id="plExp" type="file" accept=".csv" /></label>
+          <button id="btnPL" class="btn primary">Generate P&amp;L</button>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="card-hd">P&amp;L Summary</div>
+            <table class="tbl" id="plTable"></table>
+          </div>
+          <div class="card">
+            <div class="card-hd">Revenue vs Expenses</div>
+            <canvas id="chartPLBars"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="view-settings" class="view">
+        <h1>Settings</h1>
+        <div class="panel">
+          <label>Currency
+            <select id="currency">
+              <option>USD</option><option>EUR</option><option>GBP</option>
+            </select>
+          </label>
+          <button id="btnReset" class="btn">Reset Demo Data</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div>© <span id="yr"></span> ZetaCron Solutions • Client-side, private by design</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
