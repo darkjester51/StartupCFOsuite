@@ -14,24 +14,39 @@
 
   <!-- Chart.js (for quick charts) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Safety net: if styles.css positions anything at top, ensure content clears the fixed nav -->
+  <style>
+    /* If your app’s CSS uses a container at the very top, give it the same top padding. */
+    .app { padding-top: var(--global-nav-h); }
+  </style>
 </head>
 <body>
   <!-- Shared Top Nav -->
   <div id="nav" role="navigation" aria-label="Primary"></div>
   <script>
-    // Inject shared nav and mark CFO link as active
+    // Inject shared nav, highlight CFO link, and dynamically set top padding
     fetch("nav.html")
       .then(r => r.text())
       .then(html => {
         document.getElementById("nav").innerHTML = html;
-        const href = location.href.toLowerCase();
-        document.querySelectorAll("#nav a.navlink").forEach(a=>{
-          const t = (a.getAttribute("href")||"").toLowerCase();
-          if (t.includes("startupcfosuite") || href.includes("cfo.") || href.includes("startupcfosuite")) {
-            a.classList.add("active");
-          }
+
+        // mark CFO active
+        document.querySelectorAll("#nav a.navlink").forEach(a => {
+          const href = (a.getAttribute("href") || "").toLowerCase();
+          if (href.includes("cfo.") || href.includes("startupcfosuite")) a.classList.add("active");
         });
-      });
+
+        // adjust padding based on actual nav height
+        function setPad() {
+          const bar = document.querySelector(".global-nav");
+          if (!bar) return;
+          document.documentElement.style.setProperty("--global-nav-h", bar.offsetHeight + "px");
+        }
+        setPad();
+        window.addEventListener("resize", setPad);
+      })
+      .catch(console.error);
   </script>
 
   <div class="app">
