@@ -5,28 +5,37 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ZetaCron CFO Suite — Starter</title>
   <meta name="description" content="Lightweight, client-side CFO tools: cashflow Monte Carlo, scenarios, hiring, cap table, and P&L." />
+
+  <!-- Shared top nav styles -->
+  <link rel="stylesheet" href="nav.css" />
+
+  <!-- App styles -->
   <link rel="stylesheet" href="styles.css" />
+
   <!-- Chart.js (for quick charts) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <!-- Top bar -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="badge">Z</div>
-      <div class="title">ZetaCron CFO Suite</div>
-    </div>
-    <nav class="topnav">
-      <button id="btnSave" class="btn">Save</button>
-      <button id="btnLoad" class="btn">Load</button>
-      <button id="btnExport" class="btn primary">Export</button>
-      <a class="link" href="https://www.zetacronsolutions.com" target="_self">Invoicer</a>
-      <a class="link" href="https://simulator.zetacronsolutions.com" target="_self">Monte Carlo</a>
-    </nav>
-  </header>
+  <!-- Shared Top Nav -->
+  <div id="nav" role="navigation" aria-label="Primary"></div>
+  <script>
+    // Inject shared nav and mark CFO link as active
+    fetch("nav.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("nav").innerHTML = html;
+        const href = location.href.toLowerCase();
+        document.querySelectorAll("#nav a.navlink").forEach(a=>{
+          const t = (a.getAttribute("href")||"").toLowerCase();
+          if (t.includes("startupcfosuite") || href.includes("cfo.") || href.includes("startupcfosuite")) {
+            a.classList.add("active");
+          }
+        });
+      });
+  </script>
 
   <div class="app">
-    <!-- Sidebar -->
+    <!-- Sidebar (kept exactly as-is) -->
     <aside class="sidebar" aria-label="Primary">
       <button class="navitem active" data-view="dashboard">🏠 Dashboard</button>
       <button class="navitem" data-view="cashflow">📊 Cashflow Simulator</button>
